@@ -1,0 +1,14 @@
+# Ignore virtual environment
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore data files (Optional, if you don’t want to push datasets)
+data/*.csv
+data/processed/
+
+# Ignore IDE and system files
+.vscode/
+*.log
+.DS_Store
