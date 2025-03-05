@@ -2,59 +2,82 @@ import pandas as pd
 import numpy as np
 import joblib
 import os
+import mlflow
+import mlflow.sklearn
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 
-# Load the preprocessed dataset
-df = pd.read_csv("data/processed/train.csv")
+# Enable MLflow tracking
+mlflow.set_experiment("fraud_detection_experiment")
 
-# Drop non-numeric columns (e.g., transaction IDs or user IDs)
-non_numeric_cols = df.select_dtypes(exclude=["number"]).columns.tolist()
-df = df.drop(columns=non_numeric_cols)
+# Function to load and preprocess the dataset
+def load_data():
+    df = pd.read_csv("data/processed/train.csv")
 
-# Encode categorical variables if present
-for col in df.select_dtypes(include=["object"]).columns:
-    le = LabelEncoder()
-    df[col] = le.fit_transform(df[col])
+    # Drop non-numeric columns (e.g., transaction IDs or user IDs)
+    non_numeric_cols = df.select_dtypes(exclude=["number"]).columns.tolist()
+    df = df.drop(columns=non_numeric_cols)
 
-# Define feature columns and target
-X = df.drop(columns=["fraud_label"])
-y = df["fraud_label"]
+    # Encode categorical variables if present
+    for col in df.select_dtypes(include=["object"]).columns:
+        le = LabelEncoder()
+        df[col] = le.fit_transform(df[col])
 
-# Split data into training & validation sets
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+    # Define feature columns and target
+    X = df.drop(columns=["fraud_label"])
+    y = df["fraud_label"]
 
-# Feature scaling
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_val_scaled = scaler.transform(X_val)
+    # Split data into training & validation sets
+    X_train, X_val, y_train, y_val = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
 
-# Train a RandomForest model
-model = RandomForestClassifier(n_estimators=100, random_state=42)
-model.fit(X_train_scaled, y_train)
+    # Feature scaling
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_val_scaled = scaler.transform(X_val)
 
-# Predictions
-y_pred = model.predict(X_val_scaled)
-y_pred_proba = model.predict_proba(X_val_scaled)[:, 1]
+    return X_train_scaled, X_val_scaled, y_train, y_val, scaler
 
-# Model evaluation
-metrics = {
-    "Accuracy": accuracy_score(y_val, y_pred),
-    "Precision": precision_score(y_val, y_pred),
-    "Recall": recall_score(y_val, y_pred),
-    "F1-score": f1_score(y_val, y_pred),
-    "AUC-ROC": roc_auc_score(y_val, y_pred_proba)
-}
+# Function to train and log the model using MLflow
+def train_and_log_model():
+    X_train, X_test, y_train, y_test, scaler = load_data()
+    
+    with mlflow.start_run():
+        model = RandomForestClassifier(n_estimators=100, random_state=42)
+        model.fit(X_train, y_train)
 
-# Save trained model & scaler
-os.makedirs("models", exist_ok=True)
-joblib.dump(model, "models/fraud_model.pkl")
-joblib.dump(scaler, "models/scaler.pkl")
+        predictions = model.predict(X_test)
+        predictions_proba = model.predict_proba(X_test)[:, 1]
 
-# Print metrics
-print("✅ Model Training Complete. Evaluation Metrics:")
-for key, value in metrics.items():
-    print(f"{key}: {value:.4f}")
+        # Calculate metrics
+        metrics = {
+            "Accuracy": accuracy_score(y_test, predictions),
+            "Precision": precision_score(y_test, predictions),
+            "Recall": recall_score(y_test, predictions),
+            "F1-score": f1_score(y_test, predictions),
+            "AUC-ROC": roc_auc_score(y_test, predictions_proba)
+        }
+
+        # Log metrics to MLflow
+        for key, value in metrics.items():
+            mlflow.log_metric(key.lower(), value)
+
+        # Log model to MLflow
+        mlflow.sklearn.log_model(model, "random_forest_model")
+
+        # Save model & scaler locally
+        os.makedirs("models", exist_ok=True)
+        joblib.dump(model, "models/fraud_model.pkl")
+        joblib.dump(scaler, "models/scaler.pkl")
+
+        # Print evaluation metrics
+        print("✅ Model Training Complete. Evaluation Metrics:")
+        for key, value in metrics.items():
+            print(f"{key}: {value:.4f}")
+
+if __name__ == "__main__":
+    train_and_log_model()
