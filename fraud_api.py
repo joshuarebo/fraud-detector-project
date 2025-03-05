@@ -2,15 +2,19 @@ import logging
 import joblib
 import numpy as np
 import os
+import mlflow
 import mlflow.pyfunc
 from flask import Flask, request, jsonify
 
 # Initialize Flask app
 app = Flask(__name__)
 
+# Ensure log directory exists
+os.makedirs("logs", exist_ok=True)
+
 # Configure logging
 logging.basicConfig(
-    filename="logs/api_requests.log", 
+    filename="logs/api_requests.log",
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
@@ -28,25 +32,13 @@ except FileNotFoundError:
     logging.error("🚨 Model or scaler file not found. Train the model first.")
     raise RuntimeError("Model or scaler file not found. Train the model first.")
 
-@app.route("/", methods=["GET"])
-def home():
-    """Root endpoint showing API information"""
-    return jsonify({
-        "message": "Welcome to the Fraud Detection API 🚀",
-        "endpoints": {
-            "health_check": "/health",
-            "predict": "/predict"
-        }
-    }), 200
-
-@app.route("/health", methods=["GET"])
-def health():
-    """Health check endpoint"""
-    return jsonify({"status": "API is running"}), 200
+# Start MLflow tracking
+mlflow.set_tracking_uri("http://127.0.0.1:5000")  # Ensure this matches your MLflow server
+mlflow.set_experiment("Fraud Detection Experiment")  # Create an experiment
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    """Predict fraud based on input features"""
+    """Predict fraud based on input features and log to MLflow"""
     try:
         data = request.get_json()
 
@@ -78,6 +70,12 @@ def predict():
         # Log request and response
         logging.info(f"Request: {data}, Response: {response}")
 
+        # 🔥 Log to MLflow
+        with mlflow.start_run():
+            mlflow.log_param("features", data["features"])  # Log input features
+            mlflow.log_metric("fraud_probability", probability)  # Log fraud probability
+            mlflow.log_metric("fraud_prediction", prediction)  # Log prediction result
+
         return jsonify(response), 200
 
     except Exception as e:
@@ -85,5 +83,4 @@ def predict():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    os.makedirs("logs", exist_ok=True)  # Ensure log directory exists
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5001, debug=True)  # Run Flask API on port 5001

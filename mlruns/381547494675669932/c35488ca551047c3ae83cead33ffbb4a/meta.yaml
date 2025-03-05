@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/381547494675669932/c35488ca551047c3ae83cead33ffbb4a/artifacts
+end_time: 1741178852971
+entry_point_name: ''
+experiment_id: '381547494675669932'
+lifecycle_stage: active
+run_id: c35488ca551047c3ae83cead33ffbb4a
+run_name: bright-sheep-864
+run_uuid: c35488ca551047c3ae83cead33ffbb4a
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1741178852780
+status: 3
+tags: []
+user_id: Hp
