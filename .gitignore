@@ -12,3 +12,6 @@ data/processed/
 .vscode/
 *.log
 .DS_Store
+models/
+__pycache__/
+*.log
