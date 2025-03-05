@@ -1,0 +1,32 @@
+name: MLOps Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  train-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.13.1'
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Train Model
+        run: |
+          python train_model.py
+
+      - name: Deploy API
+        run: |
+          pip install gunicorn
+          gunicorn --bind 0.0.0.0:5000 fraud_api:app
