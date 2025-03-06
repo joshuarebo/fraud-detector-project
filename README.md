@@ -57,8 +57,7 @@ Scalability: Ready for cloud deployment using AWS/GCP/Azure.
 
 Containerization: Can be deployed via Docker & Kubernetes.
 
-🏆 Author
-
+Author:
 Joshua Rebo – Applied Artificial Intelligence Student
 Matriculation Number- 9213334
 The International University of Applied Sciences

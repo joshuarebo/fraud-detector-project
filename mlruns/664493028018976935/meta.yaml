@@ -1,0 +1,6 @@
+artifact_location: file:///C:/Users/Hp/Fraud%20Detector/mlruns/664493028018976935
+creation_time: 1741259579585
+experiment_id: '664493028018976935'
+last_update_time: 1741259579585
+lifecycle_stage: active
+name: fraud_detection_experiment
