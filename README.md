@@ -1,63 +1,136 @@
 Fraud Detection System
 
-This project is a machine learning-powered fraud detection system that identifies fraudulent transactions with high accuracy. It includes automated MLOps workflows for seamless model training, deployment, and monitoring.
+🚀 Overview
 
-🚀 Features
+The Fraud Detection System is a machine learning-powered solution designed to detect fraudulent transactions in real-time. It incorporates MLOps best practices, automated deployment pipelines, and cloud scalability to ensure efficiency and reliability.
 
-Machine Learning Model: Trained to detect fraudulent transactions.
+✨ Features
 
-RESTful API: Serves real-time fraud predictions.
+Machine Learning Model: Predicts fraudulent transactions with high accuracy.
 
-MLOps Pipeline: Integrated with MLflow for experiment tracking.
+RESTful API: Exposes a real-time fraud detection endpoint.
 
-Automated CI/CD: GitHub Actions automates testing and deployment.
+MLOps Pipeline: Automates training, tracking, and deployment using MLflow.
 
-Logging & Monitoring: Requests and model performance are logged.
+CI/CD Automation: GitHub Actions and Google Cloud Build ensure continuous integration and deployment.
+
+Logging & Monitoring: Tracks API requests, model performance, and system health.
+
+Cloud Deployment: Hosted on Google Cloud Run for seamless scalability.
 
 🛠️ Setup & Installation
 
 1️⃣ Clone the Repository
 
-git clone https://github.com/joshuarebo/fraud-detector-project.git
-cd fraud-detector-project
+git clone https://github.com/joshuarebo/fraud-detector.git
+cd fraud-detector
 
-2️⃣ Create a Virtual Environment & Install Dependencies
+2️⃣ Set Up a Virtual Environment & Install Dependencies
 
 python -m venv venv
 source venv/bin/activate  # On Windows use: venv\Scripts\activate
 pip install -r requirements.txt
 
-3️⃣ Train the Model
+3️⃣ Train the Fraud Detection Model
 
 python train_model.py
 
-4️⃣ Run the API
+This script trains the model and saves it in the models/ directory.
+
+It also applies feature scaling using a fitted scaler.
+
+4️⃣ Run the API Locally
 
 python fraud_api.py
 
+The API will be available at: http://127.0.0.1:8080/predict
+
+Note: The API only accepts POST requests. Directly clicking on the URL in a browser will result in a 405 Method Not Allowed error. Use curl or a tool like Postman to test it.
+
 5️⃣ Make a Prediction (Example Request)
 
-curl -X POST http://127.0.0.1:5001/predict \
+curl -X POST http://127.0.0.1:8080/predict \
      -H "Content-Type: application/json" \
      -d '{"features": [35, 75000, 12000, 50, 600, 1, 4, 5]}'
 
-MLOps Integration
+Expected response:
+
+{
+  "fraud_prediction": 1,
+  "fraud_probability": 0.92
+}
+
+☁️ Cloud Deployment (Google Cloud Run)
+
+Deploying to Google Cloud Run
+
+Build & Push Docker Image
+
+gcloud builds submit --tag gcr.io/$PROJECT_ID/fraud-api:latest
+
+Deploy to Cloud Run
+
+gcloud run deploy fraud-api \
+    --image gcr.io/$PROJECT_ID/fraud-api:latest \
+    --platform managed \
+    --region us-central1 \
+    --allow-unauthenticated \
+    --port 8080
+
+Get the Deployed URL
+
+gcloud run services describe fraud-api --platform managed --region us-central1 --format="value(status.url)"
+
+Accessing the Cloud API
+
+The API is now live at:
+
+https://fraud-api-716102832289.us-central1.run.app
+
+To make predictions on the deployed API, use:
+
+curl -X POST "https://fraud-api-716102832289.us-central1.run.app/predict" \
+     -H "Content-Type: application/json" \
+     -d '{"features": [35, 75000, 12000, 50, 600, 1, 4, 5]}'
+
+🔄 MLOps & CI/CD Integration
 
 MLflow: Tracks experiments, model versions, and logs performance.
 
-GitHub Actions: Automates testing, model training, and API deployment.
+GitHub Actions & Cloud Build: Automates testing, training, and API deployment.
 
-Logging: API requests and responses are logged for analysis.
+Logging: API requests and model performance are monitored.
+
+Triggering the CI/CD Workflow
+
+Simply push any changes to GitHub:
+
+git add .
+git commit -m "Updated model & API improvements"
+git push origin main
+
+This triggers Google Cloud Build, which:
+
+Builds and pushes a new Docker image.
+
+Deploys the updated API to Google Cloud Run.
+
+Runs test_fraud_api.py to validate the deployment.
 
 📈 Monitoring & Scaling
 
-Model Monitoring: MLflow logs model performance metrics.
+Model Monitoring: MLflow logs performance metrics.
 
-Scalability: Ready for cloud deployment using AWS/GCP/Azure.
+Scalability: Google Cloud Run scales automatically based on traffic.
 
-Containerization: Can be deployed via Docker & Kubernetes.
+Containerization: Docker & Kubernetes-ready for future expansion.
 
-Author:
+👤 Author
+
 Joshua Rebo – Applied Artificial Intelligence Student
-Matriculation Number- 9213334
+Matriculation Number: 9213334
 The International University of Applied Sciences
+
+📧 Contact
+
+Email: joshua.rebo@iu-study.org
