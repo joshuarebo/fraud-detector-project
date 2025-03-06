@@ -18,6 +18,20 @@ Logging & Monitoring: Tracks API requests, model performance, and system health.
 
 Cloud Deployment: Hosted on Google Cloud Run for seamless scalability.
 
+🦜 Data Generation
+
+To ensure a robust and scalable fraud detection system, we generated a synthetic dataset that simulates real-world financial transactions. The data was generated using the following approach:
+
+Feature Engineering: We identified key transaction attributes such as transaction amount, account age, transaction frequency, and user behavior patterns.
+
+Synthetic Data Creation: Used Python libraries like Faker and NumPy to generate realistic transaction data.
+
+Labeling Fraudulent Transactions: Applied statistical techniques and domain knowledge to assign fraud labels based on patterns found in real fraud cases.
+
+Data Augmentation: Balanced fraudulent and non-fraudulent cases to prevent model bias.
+
+The final dataset was used to train our machine learning model, ensuring high accuracy in fraud detection.
+
 🛠️ Setup & Installation
 
 1️⃣ Clone the Repository
